@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.name = "slave-02"
+  end
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.network "private_network", ip: "192.168.50.1"
+  config.vm.provision "file", source: "./emoji-search", destination: "$HOME"
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+    curl -sL https://deb.nodesource.com/setup_12.x | bash -
+    sudo apt install -y nodejs
+    npm install
+    sudo apt update
+    sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+    sudo apt update
+    apt-cache policy docker-ce
+    sudo apt install docker-ce -y
+    sudo systemctl status docker
+  SHELL
+end
